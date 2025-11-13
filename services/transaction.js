@@ -143,36 +143,51 @@ class TransactionService {
   }
 
   /**
-   * Save transaction to database
+   * Save transaction to database with upsert to prevent duplicate key errors
    */
   async saveTransaction(transactionId, verificationResult, metadata) {
     const expiresAt = new Date(
       Date.now() + CACHE_CONFIG.TTL_HOURS * 60 * 60 * 1000
     );
 
-    const transaction = new Transaction({
+    const transactionData = {
       transactionId,
       status: verificationResult.status,
       sourceBank: verificationResult.sourceBank,
       destinationBank: verificationResult.destinationBank,
       amount: verificationResult.amount,
       lastChecked: new Date(),
-      checkCount: 1,
-      verificationHistory: [{
-        status: verificationResult.status,
-        timestamp: new Date(),
-        source: 'initial_check'
-      }],
       expiresAt,
       metadata: {
         ...metadata,
         verificationMode: config.verificationMode
       }
-    });
+    };
 
-    await transaction.save();
-    logger.info(`Transaction saved: ${transactionId}`);
+    // Use findByIdAndUpdate with upsert to prevent duplicate key errors
+    // If transaction exists, update it; if not, create it
+    const transaction = await Transaction.findOneAndUpdate(
+      { transactionId },
+      {
+        $set: transactionData,
+        $inc: { checkCount: 1 },
+        $push: {
+          verificationHistory: {
+            status: verificationResult.status,
+            timestamp: new Date(),
+            source: 'initial_check'
+          }
+        }
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
+        setDefaultsOnInsert: true
+      }
+    );
 
+    logger.info(`Transaction saved/updated: ${transactionId}`);
     return transaction;
   }
 

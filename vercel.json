@@ -1,9 +1,29 @@
 {
   "version": 2,
+  "env": [
+    "MONGO_URI",
+    "NODE_ENV",
+    "NIBSS_API_KEY",
+    "VERIFICATION_MODE",
+    "CORS_ORIGIN",
+    "RATE_LIMIT_WINDOW_MS",
+    "RATE_LIMIT_MAX_REQUESTS"
+  ],
   "builds": [
     {
       "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "config/**",
+          "controllers/**",
+          "middlewares/**",
+          "models/**",
+          "services/**",
+          "utils/**",
+          "app.js"
+        ]
+      }
     }
   ],
   "routes": [
@@ -14,7 +34,7 @@
     {
       "src": "/api/verify",
       "dest": "/api/verify.js",
-      "methods": ["POST"]
+      "methods": ["POST", "OPTIONS"]
     },
     {
       "src": "/api/transaction/(.*)",
@@ -24,5 +44,11 @@
       "src": "/api/stats",
       "dest": "/api/stats.js"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 512,
+      "maxDuration": 30
+    }
+  }
 }

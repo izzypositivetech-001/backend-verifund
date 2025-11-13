@@ -2,7 +2,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const requiredEnvVars = ['MONGO_URI', 'PORT'];
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production';
+const isVercel = process.env.VERCEL === 'true';
+
+const requiredEnvVars = ['MONGO_URI'];
 
 // Validate required environment variables
 requiredEnvVars.forEach((varName) => {
@@ -13,6 +17,8 @@ requiredEnvVars.forEach((varName) => {
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
+  isProduction,
+  isVercel,
   port: parseInt(process.env.PORT) || 4000,
   mongoUri: process.env.MONGO_URI,
   
@@ -41,3 +47,4 @@ export const config = {
   // CORS
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000'
 };
+

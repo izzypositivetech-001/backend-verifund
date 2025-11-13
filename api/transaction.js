@@ -6,7 +6,7 @@ import logger from '../utils/logger.js';
 // CORS headers helper
 const setCorsHeaders = (res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Content-Type', 'application/json');
 };
@@ -20,11 +20,11 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  // Only POST method allowed
-  if (req.method !== 'POST') {
+  // Only GET method allowed
+  if (req.method !== 'GET') {
     return res.status(405).json({
       success: false,
-      message: 'Method not allowed. Only POST is supported.'
+      message: 'Method not allowed. Only GET is supported.'
     });
   }
 
@@ -32,10 +32,12 @@ export default async function handler(req, res) {
     // Connect to database
     await connectDB();
 
-    const { transactionId } = req.body;
+    // Extract transaction ID from URL path
+    // URL format: /api/transaction/[id]
+    const { id } = req.query;
 
     // Validate transaction ID is provided
-    if (!transactionId) {
+    if (!id) {
       return res.status(400).json({
         success: false,
         message: 'Transaction ID is required'
@@ -44,7 +46,7 @@ export default async function handler(req, res) {
 
     // Validate transaction ID format
     try {
-      validationService.validateTransactionId(transactionId);
+      validationService.validateTransactionId(id);
     } catch (validationError) {
       return res.status(400).json({
         success: false,
@@ -52,23 +54,24 @@ export default async function handler(req, res) {
       });
     }
 
-    // Extract metadata from request
-    const metadata = {
-      ipAddress: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown',
-      userAgent: req.headers['user-agent'] || 'unknown'
-    };
+    // Get transaction from service
+    const transaction = await transactionService.getTransaction(id);
 
-    // Call transaction service to verify
-    const result = await transactionService.verifyTransaction(transactionId, metadata);
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found'
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Transaction verified successfully',
-      data: result
+      message: 'Transaction retrieved successfully',
+      data: transaction
     });
 
   } catch (error) {
-    logger.error('Verification API error:', error);
+    logger.error('Transaction API error:', error);
     
     // Handle specific error types
     if (error.name === 'ValidationError') {
@@ -81,7 +84,7 @@ export default async function handler(req, res) {
     // Generic error response
     return res.status(500).json({
       success: false,
-      message: 'An error occurred during verification. Please try again later.'
+      message: 'An error occurred while retrieving the transaction. Please try again later.'
     });
   }
 }
