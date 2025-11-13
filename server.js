@@ -8,7 +8,6 @@ const MONGO_URI = config.mongoUri;
 
 const startServer = async () => {
   try {
-    app.use(cors())
     await mongoose.connect(MONGO_URI);
     logger.info('Connected to MongoDB');
 
