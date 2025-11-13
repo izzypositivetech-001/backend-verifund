@@ -1,5 +1,17 @@
 # Transaction Status Checker - Backend API
 
+## 🎥 Project Demo
+
+[![Watch the demo](https://img.youtube.com/vi/d2WbnjZvZKk?si=XW0RY5hQK02BH34b/maxresdefault.jpg)](https://youtu.be/d2WbnjZvZKk?si=XW0RY5hQK02BH34b)
+
+You can also watch it here → [Demo Video](https://youtu.be/d2WbnjZvZKk?si=XW0RY5hQK02BH34b)
+
+---
+
+### 🚀 How It Works
+Our Express.js backend powers the core logic for the project — handling authentication, data validation, and API integrations.  
+
+
 A robust MERN stack backend for verifying Nigerian bank transaction statuses with NIBSS/Bank API integration capabilities.
 
 ##  Features
