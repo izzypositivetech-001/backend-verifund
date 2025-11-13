@@ -4,7 +4,8 @@ export default function handler(req, res) {
     message: "Service is healthy",
     data: {
       status: "healthy",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
     }
   });
 }
