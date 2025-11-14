@@ -1,6 +1,6 @@
 import { connectDB } from '../config/db.js';
-import { transactionService } from '../services/transaction.js';
-import { validationService } from '../services/validation.js';
+import transactionService from '../services/transaction.js';
+import validationService from '../services/validation.js';
 import logger from '../utils/logger.js';
 
 export default async (req, res) => {
