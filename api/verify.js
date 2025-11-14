@@ -29,15 +29,10 @@ export default async (req, res) => {
       });
     }
 
-    const validation = await validationService.validateTransactionId(transactionId);
-    if (!validation.valid) {
-      return res.status(400).json({
-        success: false,
-        message: validation.error
-      });
-    }
+    // validateTransactionId throws errors on invalid input
+    const cleanedId = validationService.validateTransactionId(transactionId);
 
-    const result = await transactionService.verifyTransaction(transactionId);
+    const result = await transactionService.verifyTransaction(cleanedId);
 
     return res.status(200).json({
       success: true,
@@ -45,6 +40,14 @@ export default async (req, res) => {
       data: result
     });
   } catch (error) {
+    // ValidationError should return 400
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
     logger.error('Verify transaction error:', error);
     return res.status(500).json({
       success: false,
