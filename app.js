@@ -11,7 +11,6 @@ import { generalLimiter } from './middlewares/rateLimiter.js';
 import logger from './utils/logger.js';
 
 const app = express();
-app.use(cors())
 
 // Connect to database
 connectDB();
