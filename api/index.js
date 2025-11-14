@@ -5,28 +5,15 @@ import { validationService } from '../services/validation.js';
 import logger from '../utils/logger.js';
 
 // CORS headers helper
-const setCorsHeaders = (res, req) => {
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://veri-funds-check.vercel.app'
-  ];
-  
-  const origin = req.headers?.origin || req.headers?.referer;
-  if (origin && allowedOrigins.some(allowed => origin.includes(allowed))) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-  
+const setCorsHeaders = (res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400');
 };
 
 export default async (req, res) => {
   // Apply CORS headers
-  setCorsHeaders(res, req);
+  setCorsHeaders(res);
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
