@@ -71,5 +71,6 @@ export default async (req, res) => {
     }
   }
 
-  res.status(405).json({ success: false, message: 'Method not allowed' });
+  res.status(405);
+  return res.json({ success: false, message: 'Method not allowed' });
 };
