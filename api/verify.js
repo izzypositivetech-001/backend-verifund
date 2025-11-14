@@ -29,7 +29,7 @@ export default async (req, res) => {
       });
     }
 
-    const validation = await validationService.validateTransaction(transactionId);
+    const validation = await validationService.validateTransactionId(transactionId);
     if (!validation.valid) {
       return res.status(400).json({
         success: false,
