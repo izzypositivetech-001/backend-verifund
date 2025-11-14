@@ -1,4 +1,6 @@
 import winston from 'winston';
+import fs from 'fs';
+import path from 'path';
 import { config } from '../config/env.js';
 
 const levels = {
@@ -33,14 +35,29 @@ const format = winston.format.combine(
   ),
 );
 
-const transports = [
-  new winston.transports.Console(),
-  new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
-  }),
-  new winston.transports.File({ filename: 'logs/all.log' }),
-];
+const transports = [new winston.transports.Console()];
+
+// Only use file logging in development
+const isDev = (config.env || 'development') === 'development';
+if (isDev) {
+  try {
+    const logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(logsDir, 'error.log'),
+        level: 'error',
+      }),
+      new winston.transports.File({
+        filename: path.join(logsDir, 'all.log'),
+      }),
+    );
+  } catch (err) {
+    console.warn('Could not create logs directory:', err.message);
+  }
+}
 
 const logger = winston.createLogger({
   level: level(),
@@ -50,24 +67,3 @@ const logger = winston.createLogger({
 });
 
 export default logger;
-
-// ============================================================================
-// FILE: src/utils/response.js
-// ============================================================================
-export const successResponse = (res, data, message = 'Success', statusCode = 200) => {
-  return res.status(statusCode).json({
-    success: true,
-    message,
-    data,
-    timestamp: new Date().toISOString()
-  });
-};
-
-export const errorResponse = (res, message = 'Error occurred', statusCode = 500, errors = null) => {
-  return res.status(statusCode).json({
-    success: false,
-    message,
-    errors,
-    timestamp: new Date().toISOString()
-  });
-};
