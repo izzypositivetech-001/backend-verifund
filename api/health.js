@@ -7,6 +7,22 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
+    // Check if required environment variables are set
+    const requiredEnvVars = ['MONGO_URI'];
+    const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+    
+    if (missingVars.length > 0) {
+      return res.status(500).json({
+        success: false,
+        message: 'Missing required environment variables',
+        missing: missingVars,
+        data: {
+          status: 'unhealthy',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+
     // Try to connect to database
     await connectDB();
 
@@ -17,22 +33,22 @@ export default async function handler(req, res) {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        database: 'connected'
+        database: 'connected',
+        environment: process.env.NODE_ENV || 'development'
       }
     });
   } catch (error) {
     logger.error('Health check failed:', error);
     
-    // Still return 200 but indicate degraded status
-    res.status(200).json({
-      success: true,
-      message: 'Service is running but degraded',
+    // Return error with details
+    res.status(503).json({
+      success: false,
+      message: 'Service is degraded',
       data: {
         status: 'degraded',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        database: 'disconnected',
-        error: error.message
+        error: error.message,
+        database: 'disconnected'
       }
     });
   }

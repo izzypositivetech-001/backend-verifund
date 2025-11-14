@@ -8,10 +8,15 @@ const isVercel = process.env.VERCEL === 'true';
 
 const requiredEnvVars = ['MONGO_URI'];
 
-// Validate required environment variables
+// Validate required environment variables - but only throw in development
 requiredEnvVars.forEach((varName) => {
   if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`);
+    const errorMsg = `Missing required environment variable: ${varName}`;
+    if (!isProduction && !isVercel) {
+      throw new Error(errorMsg);
+    } else {
+      console.error(`⚠️  ${errorMsg}`);
+    }
   }
 });
 
