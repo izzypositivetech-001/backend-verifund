@@ -50,6 +50,9 @@ export const config = {
   },
   
   // CORS
-  corsOrigin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:3000']
+  corsOrigin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:3000'],
+  
+  // Blockchain API
+  blockchainApi: process.env.BLOCKCHAIN_API || 'https://verified-block-mock.onrender.com'
 };
 
